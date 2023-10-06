@@ -1,51 +1,38 @@
 
 
 # 3 Eliminar historial de navegacion
-
-
-import sqlite3
-import re
-
+import os
 from shutil import rmtree
 
-# 1 Realizar limpieza de archivos temporales de windows.
-path_temp = ""
-path_temp_win = ""
 
-rmtree(path_temp, path_temp_win)
+def clearDirTemp():
+    # 1 Realizar limpieza de archivos temporales de windows.
+    path_temp = "C:/Windows/Temp/"
+    path_temp_win = "C:/Users/Elvis Vasquez/AppData/Local/Temp/"
 
-# 5 Elimnar archivos personales
+    elemTemp = os.listdir(path_temp)
+    elemTempWin = os.listdir(path_temp_win)
+
+    print("Elementos a eliminar en Temp:", len(elemTemp))
+    print("Elementos a eliminar en Temp Windows:", len(elemTempWin))
+
+    #Recorre los elementos de la lista, que corresponde a los nombre de los archivos 
+    #Se agrega la ruta mas el nombre del archivo
+    for lista in elemTemp:
+        eliminar=path_temp+lista
+        try:
+            os.remove(eliminar)
+        except:
+            print("Error al eliminar el archivo")
+
+    #Temp de Windows
+    for lista2 in elemTempWin:
+        eliminar2=path_temp_win+lista2
+        try:
+            os.remove(eliminar2)
+        except:
+            print("Error al eliminar el archivo")
+    
+clearDirTemp()
 
 
-# 4 Eliminar actualizaciones de windows
-conn = sqlite3.connect(
-    'c:/Users/username/AppData/Local/Google/Chrome/User Data/Default/History')
-c = conn.cursor()
-
-print("history length", c.execute('SELECT count(1) FROM urls').fetchone()[0])
-
-domainPattern = re.compile(r"https?://([^/]+)/")
-domains = {}
-
-result = True
-id = 0
-while result:
-    result = False
-    ids = []
-
-    for row in c.execute('SELECT id, url, title FROM urls WHERE id > ? LIMIT 1000', (id,)):
-        result = True
-        match = domainPattern.search(row[1])
-        id = row[0]
-
-        if match:
-            domain = match.group(1)
-            domains[domain] = domains.get(domain, 0) + 1
-            # clean if this is true
-            if "imgur" in domain:
-                ids.append((id,))
-
-    c.executemany('DELETE FROM urls WHERE id=?', ids)
-    conn.commit()
-
-conn.close()
