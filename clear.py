@@ -1,38 +1,52 @@
-
 import os
-from shutil import rmtree
+from subprocess import run
+from pathlib import Path
 
 # 1 Realizar limpieza de archivos temporales de windows.
-
+# agregar los MB eliminados 
 
 def clearDirTemp():
 
-    path_temp = "C:/Windows/Temp/"
-    path_temp_win = "C:/Users/Elvis Vasquez/AppData/Local/Temp/"
+    pathTemp = "C:/Windows/Temp/"
+    pathTempWin = "C:/Users/Elvis Vasquez/AppData/Local/Temp/"
+    
+     
+    processTemp = run(['du', '-sh', pathTemp], capture_output=True, text=True)
+    processTempWin = run(['du', '-sh', pathTempWin], capture_output=True, text=True)
 
-    elemTemp = os.listdir(path_temp)
-    elemTempWin = os.listdir(path_temp_win)
+    sizeTemp = processTemp.stdout.split()
+    sizeTempWin = processTempWin.stdout.split()
 
-    print("Elementos a eliminar en Temp:", len(elemTemp))
-    print("Elementos a eliminar en Temp Windows:", len(elemTempWin))
+    elemTemp = os.listdir(pathTemp)
+    elemTempWin = os.listdir(pathTempWin)
+
+    print("Elementos :", len(elemTemp), sizeTemp)
+    print("Elementos :", len(elemTempWin), sizeTempWin)
 
     # Recorre los elementos de la lista, que corresponde a los nombre de los archivos
     # Se agrega la ruta mas el nombre del archivo
+    countTemp = 0
     for lista in elemTemp:
-        eliminar = path_temp+lista
+        eliminar = pathTemp+lista
         try:
             os.remove(eliminar)
         except:
-            print("Error al eliminar el archivo")
-
+            countTemp += 1
+            
     # Temp de Windows
+    contWinTemp = 0
     for lista2 in elemTempWin:
-        eliminar2 = path_temp_win+lista2
+        eliminar2 = pathTempWin+lista2
         try:
             os.remove(eliminar2)
         except:
-            print("Error al eliminar el archivo")
+            contWinTemp += 1
 
+    print("No se eliminaron ", countTemp)
+    print("No se eliminaron ", contWinTemp)
+
+
+clearDirTemp()
 
 def clearDirUser():
 
