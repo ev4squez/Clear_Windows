@@ -301,6 +301,40 @@ def clearGoogleChrome():
     # antes se debe cerrar el proceso
 
     browserExe = "chrome.exe"
-    os.system("pkill "+browserExe)
+    os.system("taskkill /f /im "+browserExe)
 
-    pathBrowser = home+"/AppData/Local/Google Chrome"
+    pathBrowser = home+"/AppData/Local/Google/Chrome/User Data/"
+
+    with os.scandir(pathBrowser) as ficheros:
+        subdirectorios = [
+            fichero.name for fichero in ficheros if fichero.is_dir()]
+
+        for dir in subdirectorios:
+            dirDelete = os.path.join(pathBrowser, dir)
+            print(dirDelete)
+
+            try:
+                shutil.rmtree(dirDelete)
+                print("Directory removed successfully")
+            except FileNotFoundError:
+                print("Directory does not exist")
+            except PermissionError:
+                print("Permission denied")
+            except Exception as e:
+                print(f"An error occurred: {str(e)}")
+
+    elemChrome = os.listdir(pathBrowser)
+
+    countChrome = 0
+    for lista in elemChrome:
+        eliminar = os.path.join(pathBrowser, lista)
+        try:
+            os.remove(eliminar)
+        except:
+            countChrome += 1
+
+    print("No se eliminaron ", countChrome)
+
+
+clearGoogleChrome()
+clearGoogleChrome()
