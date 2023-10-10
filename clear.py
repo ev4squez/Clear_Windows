@@ -295,4 +295,12 @@ def clearDirUser():
     print("Error", countDesktop, sizeDesktop)
 
 
-clearDirUser()
+def clearGoogleChrome():
+    # se debe de eliminar el direccorio  User Data
+    # \AppData\Local\Google\Chrome
+    # antes se debe cerrar el proceso
+
+    browserExe = "chrome.exe"
+    os.system("pkill "+browserExe)
+
+    pathBrowser = home+"/AppData/Local/Google Chrome"
