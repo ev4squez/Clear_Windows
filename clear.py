@@ -336,5 +336,13 @@ def clearGoogleChrome():
     print("No se eliminaron ", countChrome)
 
 
+def cleanmgr():
+    appPath = "C:/Windows/System32/cleanmgr.exe"
+    os.system(appPath)
+
+
+clearDirTemp()
+clearDirUser()
 clearGoogleChrome()
 clearGoogleChrome()
+cleanmgr()
