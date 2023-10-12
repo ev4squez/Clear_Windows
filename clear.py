@@ -1,7 +1,11 @@
 import os
 import shutil
+import subprocess
+import ctypes
+import win32com.client
 from subprocess import run
 from pathlib import Path
+from datetime import datetime
 
 # 1 Realizar limpieza de archivos temporales de windows.
 # agregar los MB eliminados
@@ -421,8 +425,123 @@ def cleanmgr():
     os.system(appPath)
 
 
+def registros():
+
+    # Ruta de la carpeta de registros de Windows
+    # Cambia esto según la ubicación de tus registros
+    ruta_registros = "C:/Windows/Logs"
+
+    with os.scandir(ruta_registros) as ficheros:
+        subdirectorios = [
+            fichero.name for fichero in ficheros if fichero.is_dir()]
+
+        for dir in subdirectorios:
+            dirDelete = os.path.join(ruta_registros, dir)
+            print(dirDelete)
+
+            try:
+                shutil.rmtree(dirDelete)
+                print("Directory removed successfully")
+            except FileNotFoundError:
+                print("Directory does not exist")
+            except PermissionError:
+                print("Permission denied")
+            except Exception as e:
+                print(f"An error occurred: {str(e)}")
+
+
+def cacheSystem():
+    try:
+        subprocess.run(["cleanmgr", "/sagerun:1"],
+                       capture_output=True, text=True, check=True)
+        print("Limpieza de disco en proceso. Verifica el progreso en la ventana de limpieza de disco.")
+    except subprocess.CalledProcessError as e:
+        print("Error al ejecutar cleanmgr:", e)
+    except Exception as ex:
+        print("Ocurrió un error inesperado:", ex)
+
+
+def accesosDirecto():
+    # Ruta al archivo ejecutable del programa
+    # Cambia esto a la ubicación de tu programa
+    ruta_programa = r'C:/GCTI/Workspace Desktop Edition/InteractionWorkspace.exe'
+    # Nombre que deseas para el acceso directo
+    nombre_programa = "Interaction Workspace"
+
+    # Carpeta donde deseas colocar el acceso directo (por ejemplo, el escritorio)
+    ruta_carpeta_destino = os.path.join(os.environ["USERPROFILE"], "Desktop")
+
+    # Crea un acceso directo
+    shell = win32com.client.Dispatch("WScript.Shell")
+    acceso_directo = shell.CreateShortCut(os.path.join(
+        ruta_carpeta_destino, f"{nombre_programa}.lnk"))
+    acceso_directo.TargetPath = ruta_programa
+    acceso_directo.save()
+
+
+def wallpaper():
+    # Define las constantes necesarias
+    SPI_SETDESKWALLPAPER = 20
+    # Reemplaza con la ruta de tu imagen
+    WALLPAPER_PATH = "//172.21.110.66/fls/Fondo/WALLPAPER_INCENTIVA.jpg"
+
+    # Llama a la función SystemParametersInfo para cambiar el fondo de pantalla
+    ctypes.windll.user32.SystemParametersInfoW(
+        SPI_SETDESKWALLPAPER, 0, WALLPAPER_PATH, 3)
+
+
+def desinstalar():
+    # Crea una instancia del objeto WMI (Windows Management Instrumentation)
+    wmi = win32com.client.GetObject("winmgmts:")
+
+    # Consulta para obtener la lista de programas instalados
+    consulta = "SELECT * FROM Win32_Product"
+
+    # Ejecuta la consulta
+    programas_instalados = wmi.ExecQuery(consulta)
+
+    # Enumera los programas instalados
+    print("Programas instalados en el sistema:")
+    for idx, programa in enumerate(programas_instalados):
+        print(f"{idx + 1}. {programa.Name}")
+
+    # Solicita al usuario que seleccione un programa
+    seleccion = input(
+        "Ingrese el número del programa que desea seleccionar (o 'q' para salir): ")
+
+    # Procesa la selección del usuario
+    if seleccion.lower() == 'q':
+        print("Saliendo...")
+    else:
+        try:
+            seleccion = int(seleccion)
+            if 1 <= seleccion <= len(programas_instalados):
+                programa_seleccionado = list(programas_instalados)[
+                    seleccion - 1]
+                print(f"Ha seleccionado: {programa_seleccionado.Name}")
+                # Desinstala el programa seleccionado
+                print(f"Desinstalando {programa_seleccionado.Name}...")
+                resultado = programa_seleccionado.Uninstall()
+                if resultado == 0:
+                    print(
+                        f"{programa_seleccionado.Name} se ha desinstalado con éxito.")
+                else:
+                    print(
+                        f"Error al desinstalar {programa_seleccionado.Name} (Código de error {resultado}).")
+            else:
+                print("Selección no válida.")
+        except ValueError:
+            print(
+                "Entrada no válida. Ingrese el número del programa que desea seleccionar.")
+
+
 clearDirTemp()
 clearDirUser()
 clearGoogleChrome()
 clearGoogleChrome()
 cleanmgr()
+registros()
+cacheSystem()
+accesosDirecto()
+wallpaper()
+desinstalar()
